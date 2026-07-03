@@ -34,7 +34,7 @@ export class PaymentsService {
     }));
 
     const isProduction = config.nodeEnv === 'production';
-    const siteUrl = isProduction ? 'https://tutienda.com' : 'http://localhost:5173';
+    const siteUrl = config.frontendUrl;
 
     const body = {
       items,
