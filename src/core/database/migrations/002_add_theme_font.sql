@@ -1,0 +1,2 @@
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS font_family VARCHAR(100) DEFAULT 'Inter';
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS theme VARCHAR(20) DEFAULT 'light';
