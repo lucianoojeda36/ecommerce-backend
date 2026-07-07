@@ -22,7 +22,11 @@ export class PaymentsService {
       throw new AppError(403, 'Esta orden no te pertenece');
     }
     if (order.payment_id) {
-      throw new AppError(400, 'Esta orden ya tiene un pago asociado');
+      const existingPayment = await this.getPaymentByOrder(orderId);
+      const retryableStatuses = ['pending', 'failed', 'refunded'];
+      if (!existingPayment || !retryableStatuses.includes(existingPayment.status)) {
+        throw new AppError(400, 'Esta orden ya tiene un pago asociado');
+      }
     }
 
     const items = order.items.map((item: any) => ({
