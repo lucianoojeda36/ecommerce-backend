@@ -1,9 +1,11 @@
 import { query } from '../../core/database/pool';
 import { AppError } from '../../core/middleware/errorHandler';
 import { CartService } from '../cart/cart.service';
+import { EmailService } from '../email/email.service';
 import { logger } from '../../core/logger';
 
 const cartService = new CartService();
+const emailService = new EmailService();
 
 export class OrdersService {
   async createFromCart(userId: string, shippingAddress: any, notes?: string) {
@@ -45,6 +47,11 @@ export class OrdersService {
       await client.query('DELETE FROM cart_items WHERE user_id = $1', [userId]);
       await client.query('COMMIT');
       logger.info('Order created and committed successfully', { orderId: order.id, userId });
+
+      this.sendConfirmationEmail(order.id, userId).catch((err) =>
+        logger.error('Error enviando email de confirmación', { orderId: order.id, error: err })
+      );
+
       return order;
     } catch (error) {
       await client.query('ROLLBACK');
@@ -116,6 +123,13 @@ export class OrdersService {
     if (result.rows.length === 0) {
       throw new AppError(404, 'Orden no encontrada');
     }
+
+    if (status === 'confirmed') {
+      this.sendConfirmationEmail(id, result.rows[0].user_id).catch((err) =>
+        logger.error('Error enviando email de confirmación', { orderId: id, error: err })
+      );
+    }
+
     return result.rows[0];
   }
 
@@ -132,5 +146,27 @@ export class OrdersService {
       page,
       limit,
     };
+  }
+
+  private async sendConfirmationEmail(orderId: string, userId: string) {
+    const userResult = await query('SELECT name, email FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) return;
+
+    const orderResult = await query('SELECT * FROM orders WHERE id = $1', [orderId]);
+    if (orderResult.rows.length === 0) return;
+
+    const itemsResult = await query('SELECT * FROM order_items WHERE order_id = $1', [orderId]);
+
+    const order = orderResult.rows[0];
+    await emailService.sendOrderConfirmation(
+      {
+        orderId: order.id,
+        total: order.total,
+        items: itemsResult.rows,
+        shippingAddress: order.shipping_address,
+      },
+      userResult.rows[0].email,
+      userResult.rows[0].name
+    );
   }
 }
