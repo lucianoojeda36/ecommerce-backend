@@ -10,6 +10,7 @@ export const createOrderSchema = z.object({
     country: z.string().default('Argentina'),
   }),
   notes: z.string().optional(),
+  shipping_cost: z.number().min(0).optional(),
 });
 
 export const updateStatusSchema = z.object({

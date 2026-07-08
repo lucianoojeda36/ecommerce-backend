@@ -8,8 +8,8 @@ const cartService = new CartService();
 const emailService = new EmailService();
 
 export class OrdersService {
-  async createFromCart(userId: string, shippingAddress: any, notes?: string) {
-    logger.info('Creating order from cart', { userId, shippingAddress, notes });
+  async createFromCart(userId: string, shippingAddress: any, notes?: string, shippingCost: number = 0) {
+    logger.info('Creating order from cart', { userId, shippingAddress, notes, shippingCost });
     const cartItems = await cartService.getCart(userId);
     if (cartItems.length === 0) {
       logger.warn('Order creation failed: cart is empty', { userId });
@@ -17,6 +17,7 @@ export class OrdersService {
     }
 
     const total = await cartService.getCartTotal(userId);
+    const totalWithShipping = total + shippingCost;
     const client = await (await import('../../core/database/pool')).pool.connect();
 
     try {
@@ -24,12 +25,12 @@ export class OrdersService {
       logger.info('Transaction started for order creation', { userId, itemCount: cartItems.length, total });
 
       const orderResult = await client.query(
-        `INSERT INTO orders (user_id, total, shipping_address, notes)
-         VALUES ($1, $2, $3, $4) RETURNING *`,
-        [userId, total, JSON.stringify(shippingAddress), notes || null]
+        `INSERT INTO orders (user_id, total, shipping_address, notes, shipping_cost)
+         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [userId, totalWithShipping, JSON.stringify(shippingAddress), notes || null, shippingCost]
       );
       const order = orderResult.rows[0];
-      logger.info('Order created', { orderId: order.id, userId, total });
+      logger.info('Order created', { orderId: order.id, userId, total: totalWithShipping, shippingCost });
 
       for (const item of cartItems) {
         await client.query(
