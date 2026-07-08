@@ -1,9 +1,11 @@
 import express from 'express';
+import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './core/config';
 import { errorHandler } from './core/middleware/errorHandler';
 import { logger } from './core/logger';
+import { initSocket } from './core/socket';
 import authRoutes from './modules/auth/auth.routes';
 import usersRoutes from './modules/users/users.routes';
 import productsRoutes from './modules/products/products.routes';
@@ -42,9 +44,12 @@ app.get('/api/health', (_req, res) => {
 // Error handler
 app.use(errorHandler);
 
-app.listen(config.port, () => {
+const server = http.createServer(app);
+initSocket(server);
+
+server.listen(config.port, () => {
   logger.info(`🚀 Servidor iniciado en puerto ${config.port}`);
   logger.info(`📦 Entorno: ${config.nodeEnv}`);
 });
 
-export default app;
+export default server;
