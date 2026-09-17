@@ -28,7 +28,8 @@ export class AdminService {
       'primary_color', 'secondary_color', 'about_us', 'contact_email',
       'contact_phone', 'address', 'social_links', 'seo_title',
       'seo_description', 'currency', 'font_family', 'theme',
-      'shipping_config',
+      'shipping_config', 'shipping_origin_postal_code',
+      'shipping_package_dimensions', 'shipping_default_weight_kg',
     ];
 
     for (const field of allowedFields) {

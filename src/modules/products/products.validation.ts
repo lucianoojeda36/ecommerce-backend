@@ -8,6 +8,7 @@ export const createProductSchema = z.object({
   category_id: z.string().uuid().optional(),
   stock: z.number().int().min(0).default(0),
   is_active: z.boolean().default(true),
+  weight_kg: z.number().min(0).optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial();

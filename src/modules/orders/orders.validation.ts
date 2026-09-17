@@ -11,6 +11,7 @@ export const createOrderSchema = z.object({
   }),
   notes: z.string().optional(),
   shipping_cost: z.number().min(0).optional(),
+  delivery_method: z.enum(['domicilio', 'sucursal']).default('domicilio'),
 });
 
 export const updateStatusSchema = z.object({

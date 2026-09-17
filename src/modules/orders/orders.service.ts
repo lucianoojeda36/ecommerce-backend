@@ -8,8 +8,14 @@ const cartService = new CartService();
 const emailService = new EmailService();
 
 export class OrdersService {
-  async createFromCart(userId: string, shippingAddress: any, notes?: string, shippingCost: number = 0) {
-    logger.info('Creating order from cart', { userId, shippingAddress, notes, shippingCost });
+  async createFromCart(
+    userId: string,
+    shippingAddress: any,
+    notes?: string,
+    shippingCost: number = 0,
+    deliveryMethod: 'domicilio' | 'sucursal' = 'domicilio'
+  ) {
+    logger.info('Creating order from cart', { userId, shippingAddress, notes, shippingCost, deliveryMethod });
     const cartItems = await cartService.getCart(userId);
     if (cartItems.length === 0) {
       logger.warn('Order creation failed: cart is empty', { userId });
@@ -25,9 +31,9 @@ export class OrdersService {
       logger.info('Transaction started for order creation', { userId, itemCount: cartItems.length, total });
 
       const orderResult = await client.query(
-        `INSERT INTO orders (user_id, total, shipping_address, notes, shipping_cost)
-         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [userId, totalWithShipping, JSON.stringify(shippingAddress), notes || null, shippingCost]
+        `INSERT INTO orders (user_id, total, shipping_address, notes, shipping_cost, delivery_method)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [userId, totalWithShipping, JSON.stringify(shippingAddress), notes || null, shippingCost, deliveryMethod]
       );
       const order = orderResult.rows[0];
       logger.info('Order created', { orderId: order.id, userId, total: totalWithShipping, shippingCost });

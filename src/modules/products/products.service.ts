@@ -88,11 +88,12 @@ export class ProductsService {
     category_id?: string;
     stock: number;
     images?: string[];
+    weight_kg?: number;
   }) {
     const slug = generateSlug(data.name);
     const result = await query(
-      `INSERT INTO products (name, slug, description, price, compare_price, category_id, stock, images)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO products (name, slug, description, price, compare_price, category_id, stock, images, weight_kg)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         data.name,
@@ -103,6 +104,7 @@ export class ProductsService {
         data.category_id || null,
         data.stock,
         JSON.stringify(data.images || []),
+        data.weight_kg ?? 0,
       ]
     );
     return result.rows[0];
@@ -126,6 +128,7 @@ export class ProductsService {
     if (data.stock !== undefined) { fields.push(`stock = $${idx++}`); values.push(data.stock); }
     if (data.images !== undefined) { fields.push(`images = $${idx++}`); values.push(JSON.stringify(data.images)); }
     if (data.is_active !== undefined) { fields.push(`is_active = $${idx++}`); values.push(data.is_active); }
+    if (data.weight_kg !== undefined) { fields.push(`weight_kg = $${idx++}`); values.push(data.weight_kg); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No hay datos para actualizar');

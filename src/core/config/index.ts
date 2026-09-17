@@ -31,6 +31,16 @@ export const config = {
     webhookBaseUrl: process.env.MERCADOPAGO_WEBHOOK_BASE_URL || '',
   },
 
+  oca: {
+    env: process.env.OCA_ENV === 'prod' ? 'prod' : 'qa',
+    cuit: process.env.OCA_CUIT || '',
+    user: process.env.OCA_USER || '',
+    password: process.env.OCA_PASSWORD || '',
+    accountNumber: process.env.OCA_ACCOUNT_NUMBER || '',
+    operativaDomicilio: process.env.OCA_OPERATIVA_DOMICILIO || '',
+    operativaSucursal: process.env.OCA_OPERATIVA_SUCURSAL || '',
+  },
+
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',

@@ -6,8 +6,8 @@ const ordersService = new OrdersService();
 export class OrdersController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const { shipping_address, notes, shipping_cost } = req.body;
-      const order = await ordersService.createFromCart(req.user!.userId, shipping_address, notes, shipping_cost);
+      const { shipping_address, notes, shipping_cost, delivery_method } = req.body;
+      const order = await ordersService.createFromCart(req.user!.userId, shipping_address, notes, shipping_cost, delivery_method);
       res.status(201).json(order);
     } catch (error) {
       next(error);

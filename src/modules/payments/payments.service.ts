@@ -37,6 +37,17 @@ export class PaymentsService {
       currency_id: 'ARS',
     }));
 
+    const shippingCost = parseFloat(order.shipping_cost);
+    if (shippingCost > 0) {
+      items.push({
+        id: 'shipping',
+        title: order.delivery_method === 'sucursal' ? 'Envío (retiro en sucursal OCA)' : 'Envío a domicilio (OCA)',
+        quantity: 1,
+        unit_price: shippingCost,
+        currency_id: 'ARS',
+      });
+    }
+
     const isProduction = config.nodeEnv === 'production';
     const siteUrl = config.frontendUrl;
 

@@ -7,7 +7,7 @@ export class CartService {
     logger.info('Fetching cart for user', { userId });
     const result = await query(
       `SELECT ci.id, ci.quantity, ci.product_id, ci.created_at,
-              p.name, p.slug, p.price, p.images, p.stock, p.is_active
+              p.name, p.slug, p.price, p.images, p.stock, p.is_active, p.weight_kg
        FROM cart_items ci
        JOIN products p ON ci.product_id = p.id
        WHERE ci.user_id = $1

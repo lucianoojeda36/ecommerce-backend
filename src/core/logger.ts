@@ -1,9 +1,10 @@
 import winston from 'winston';
 
-const { combine, timestamp, label, printf, errors, json } = winston.format;
+const { combine, timestamp, label, printf, errors, metadata } = winston.format;
 
-const myFormat = printf(({ level, message, label, timestamp }) => {
-  return `${timestamp} [${label}] ${level}: ${message}`;
+const myFormat = printf(({ level, message, label, timestamp, metadata: meta }) => {
+  const metaStr = meta && Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+  return `${timestamp} [${label}] ${level}: ${message}${metaStr}`;
 });
 
 export const logger = winston.createLogger({
@@ -12,6 +13,7 @@ export const logger = winston.createLogger({
     label({ label: 'ecommerce-backend' }),
     timestamp(),
     errors({ stack: true }),
+    metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
     myFormat
   ),
   transports: [
