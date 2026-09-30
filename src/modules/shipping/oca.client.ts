@@ -60,14 +60,18 @@ export class OcaClient {
     // Estructura confirmada contra el ambiente QA (respuesta real, caso de éxito):
     // DataSet > diffgram (xmlns diffgr) > NewDataSet > Table (el diffgr:id="Table1" es un
     // atributo, no el nombre del elemento) > { Total, Precio, Ambito, PlazoEntrega, ... }
+    // En caso de error OCA responde con otra tabla: NewDataSet > Table1 > Error
+    // (p. ej. "El CUIT o la operativa son inválidos.").
     const parsed = parser.parse(xml);
-    const table = parsed?.DataSet?.diffgram?.NewDataSet?.Table;
+    const dataSet = parsed?.DataSet?.diffgram?.NewDataSet;
+    const table = dataSet?.Table;
+    const ocaError = table?.Error ?? dataSet?.Table1?.Error;
 
+    if (ocaError) {
+      throw new OcaClientError(`OCA rechazó la cotización: ${ocaError}`);
+    }
     if (!table) {
       throw new OcaClientError(`Respuesta de OCA con formato inesperado: ${xml}`);
-    }
-    if (table.Error) {
-      throw new OcaClientError(`OCA rechazó la cotización: ${table.Error}`);
     }
 
     const cost = Number(table.Total);
