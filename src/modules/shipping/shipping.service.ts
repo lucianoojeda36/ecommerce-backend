@@ -126,7 +126,11 @@ export class ShippingService {
       logger.info('Shipping cost calculated (OCA)', { destinationPostalCode, deliveryMethod, totalWeightKg, cost });
       return { cost, free_shipping: false };
     } catch (error) {
-      logger.error('OCA quote failed, falling back to flat rate', { error, destinationPostalCode, deliveryMethod });
+      logger.error('OCA quote failed, falling back to flat rate', {
+        error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+        destinationPostalCode,
+        deliveryMethod,
+      });
       return this.calculateShipping('', cartTotal);
     }
   }

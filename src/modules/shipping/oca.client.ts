@@ -48,7 +48,10 @@ export class OcaClient {
         throw new OcaClientError(`OCA respondió ${response.status}: ${xml}`);
       }
     } catch (error) {
-      logger.error('OCA cotizador request failed', { error, params });
+      logger.error('OCA cotizador request failed', {
+        error: error instanceof Error ? { message: error.message, cause: String(error.cause ?? '') } : error,
+        params,
+      });
       throw error instanceof OcaClientError ? error : new OcaClientError('No se pudo contactar a OCA');
     }
 
