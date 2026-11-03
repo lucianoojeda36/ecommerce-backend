@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProductsService } from './products.service';
 import { CategoriesService } from './categories.service';
-import { uploadImage } from '../../core/utils/cloudinary';
+import { uploadImage, deleteImage } from '../../core/utils/storage';
 
 const productsService = new ProductsService();
 const categoriesService = new CategoriesService();
@@ -91,6 +91,7 @@ export class ProductsController {
     try {
       const { imageUrl } = req.body;
       const product = await productsService.removeImage(req.params.id, imageUrl);
+      await deleteImage(imageUrl).catch(() => {});
       res.json(product);
     } catch (error) {
       next(error);
