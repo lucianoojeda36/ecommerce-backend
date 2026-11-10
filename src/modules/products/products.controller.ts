@@ -76,7 +76,7 @@ export class ProductsController {
 
       const urls: string[] = [];
       for (const file of files) {
-        const url = await uploadImage(file.path);
+        const url = await uploadImage(file);
         urls.push(url);
       }
 
@@ -104,7 +104,7 @@ export class ProductsController {
       if (!file) {
         return res.status(400).json({ error: 'No se envió la imagen' });
       }
-      const url = await uploadImage(file.path);
+      const url = await uploadImage(file);
       const category = await categoriesService.update(req.params.id, { image_url: url });
       res.json(category);
     } catch (error) {

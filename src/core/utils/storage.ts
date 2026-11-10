@@ -1,5 +1,4 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { readFile, unlink } from 'fs/promises';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { config } from '../config';
@@ -21,26 +20,26 @@ const CONTENT_TYPES: Record<string, string> = {
   '.webp': 'image/webp',
 };
 
-export async function uploadImage(filePath: string): Promise<string> {
-  const ext = path.extname(filePath).toLowerCase();
+export interface UploadFile {
+  buffer: Buffer;
+  originalname: string;
+}
+
+export async function uploadImage(file: UploadFile): Promise<string> {
+  const ext = path.extname(file.originalname).toLowerCase();
   const key = `ecommerce/${uuid()}${ext}`;
-  try {
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: config.r2.bucket,
-        Key: key,
-        Body: await readFile(filePath),
-        ContentType: CONTENT_TYPES[ext] || 'application/octet-stream',
-      }),
-    );
-  } finally {
-    // Borra el archivo temporal que dejó multer
-    await unlink(filePath).catch(() => {});
-  }
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: config.r2.bucket,
+      Key: key,
+      Body: file.buffer,
+      ContentType: CONTENT_TYPES[ext] || 'application/octet-stream',
+    }),
+  );
   return `${config.r2.publicUrl}/${key}`;
 }
 
-export async function uploadImages(files: string[]): Promise<string[]> {
+export async function uploadImages(files: UploadFile[]): Promise<string[]> {
   return Promise.all(files.map((file) => uploadImage(file)));
 }
 

@@ -1,17 +1,9 @@
 import multer from 'multer';
 import path from 'path';
-import { v4 as uuid } from 'uuid';
-import { config } from '../config';
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, config.uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuid()}${ext}`);
-  },
-});
+// Los archivos quedan en memoria (file.buffer) y se suben directo a R2.
+// Así no dependemos de una carpeta en disco, que en Render no existe.
+const storage = multer.memoryStorage();
 
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
